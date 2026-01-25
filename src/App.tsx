@@ -1,6 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./pages/Login";
-import Home from "./pages/Home";   
+import Layout from "./pages/Layout";
+import Feed from "./pages/Feed";
+import Content from "./pages/Content";
 
 function App() {
   const router = createBrowserRouter([
@@ -10,7 +12,17 @@ function App() {
     },
     {
       path: "/home",
-      element: <Home />,
+      element: <Layout />,
+      children: [
+        {
+          index: true,
+          element: <Content />,   // default hero page
+        },
+        {
+          path: "feed",
+          element: <Feed />,
+        },
+      ],
     },
   ]);
 
