@@ -7,13 +7,13 @@ const Sidebar = () => {
     <div className='w-15 md:w-40 z-20 bg-amber-800 h-[95vh] border left-0 flex flex-col justify-center items-start fixed'>
             <button 
         onClick={() => navigate("/home")} 
-        className="cursor-pointer"
+        className="cursor-pointer border p-3"
       >
         Home
       </button>
       <button 
         onClick={() => navigate("/home/feed")} 
-        className="cursor-pointer"
+        className="cursor-pointer border p-3"
       >
         Feed
       </button>

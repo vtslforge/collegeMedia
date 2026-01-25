@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPost } from "../database";
-import { auth, storage } from "../firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth } from "../firebase";
+import { uploadToCloudinary } from "../cloudinary";
 
 const Content = () => {
   const [text, setText] = useState("");
@@ -23,15 +23,8 @@ const Content = () => {
 
     try {
       let media: { url: string; type: string } | null = null;
-
       if (file) {
-        const fileRef = ref(
-          storage,
-          `posts/${auth.currentUser.uid}/${Date.now()}-${file.name}`
-        );
-
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
+        const url = await uploadToCloudinary(file);
 
         media = {
           url,
@@ -46,7 +39,7 @@ const Content = () => {
         type: "feed",
         text,
         media: media ? [media] : [],
-         likes: []
+        likes: []
       });
 
       setText("");
@@ -64,26 +57,11 @@ const Content = () => {
     <div className="bg-amber-950 h-auto ml-15 md:ml-40 mt-[5vh] p-3 flex flex-col gap-3">
       <h2 className="text-white font-bold">Create Post</h2>
 
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="What's happening on campus?"
-        className="p-2 rounded text-black resize-none"
-        rows={4}
-      />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="What's happening on campus?" className="p-2 rounded text-black resize-none" rows={4} />
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
-        className="text-white"
-      />
+      <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} className="text-white" />
 
-      <button
-        onClick={handlePost}
-        disabled={loading}
-        className="bg-amber-600 text-white p-2 rounded cursor-pointer"
-      >
+      <button onClick={handlePost} disabled={loading} className="bg-amber-600 text-white p-2 rounded cursor-pointer">
         {loading ? "Posting..." : "Post"}
       </button>
     </div>
