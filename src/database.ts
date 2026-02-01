@@ -15,10 +15,10 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-// 1. UPDATED POST TYPE (Fixes the "Property id does not exist" error)
+// 1. UPDATED POST TYPE
 export type Post = {
-  id?: string;          // <--- ADDED THIS
-  createdAt?: any;      // <--- ADDED THIS
+  id?: string;
+  createdAt?: any;
   authorId: string;
   authorName: string;
   communityId: string | null;
@@ -36,12 +36,14 @@ export const createPost = async (data: Post) => {
   });
 };
 
-// 3. REALTIME FEED (Global)
+// 3. REALTIME FEED (Global - ISOLATED)
+// This now only listens for posts where communityId is null
 export const listenFeed = (
   callback: (posts: Post[]) => void
 ) => {
   const q = query(
     collection(db, "posts"),
+    where("communityId", "==", null), // <--- THIS IS THE FIX
     orderBy("createdAt", "desc")
   );
 
