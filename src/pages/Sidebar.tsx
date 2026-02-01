@@ -17,6 +17,18 @@ const Sidebar = () => {
       >
         Feed
       </button>
+            <button 
+        onClick={() => navigate("/home/profile")} 
+        className="cursor-pointer border p-3"
+      >
+        Profile
+      </button>
+                  <button 
+        onClick={() => navigate("/home/community")} 
+        className="cursor-pointer border p-3"
+      >
+        community
+      </button>
     </div>
   )
 }
