@@ -9,13 +9,16 @@ import {
   updateDoc,
   doc,
   arrayUnion,
+  limit, 
+  limitToLast,
   arrayRemove,
   where,
+  deleteDoc,
   getDoc
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-// 1. UPDATED POST TYPE
+// 1. POST TYPE
 export type Post = {
   id?: string;
   createdAt?: any;
@@ -36,15 +39,16 @@ export const createPost = async (data: Post) => {
   });
 };
 
-// 3. REALTIME FEED (Global - ISOLATED)
-// This now only listens for posts where communityId is null
+// 3. REALTIME FEED (Dynamic Limit for Infinite Scroll)
 export const listenFeed = (
+  limitCount: number, // <--- Add this parameter
   callback: (posts: Post[]) => void
 ) => {
   const q = query(
     collection(db, "posts"),
-    where("communityId", "==", null), // <--- THIS IS THE FIX
-    orderBy("createdAt", "desc")
+    where("communityId", "==", null),
+    orderBy("createdAt", "desc"),
+    limit(limitCount) // <--- Use the variable here
   );
 
   return onSnapshot(q, (snap) => {
@@ -137,7 +141,8 @@ export const listenCommunityPosts = (
   const q = query(
     collection(db, "posts"),
     where("communityId", "==", communityId), 
-    orderBy("createdAt", "desc")
+    orderBy("createdAt", "desc"),
+    limit(50) // Optional: Added a reasonable limit here too
   );
 
   return onSnapshot(q, (snap) => {
@@ -185,5 +190,43 @@ export const kickMember = async (communityId: string, userId: string) => {
   const ref = doc(db, "communities", communityId);
   await updateDoc(ref, {
     members: arrayRemove(userId)
+  });
+};
+
+// 15. Leave Community
+export const leaveCommunity = async (communityId: string, userId: string) => {
+  const ref = doc(db, "communities", communityId);
+  await updateDoc(ref, {
+    members: arrayRemove(userId)
+  });
+};
+
+// 16. DELETE COMMUNITY (Owner Only)
+export const deleteCommunity = async (communityId: string) => {
+  const ref = doc(db, "communities", communityId);
+  await deleteDoc(ref);
+};
+
+// 17. GLOBAL CHAT SYSTEM (OPTIMIZED)
+
+export const sendGlobalMessage = async (text: string, user: any) => {
+  return await addDoc(collection(db, "global_chat"), {
+    text,
+    uid: user.uid,
+    displayName: user.displayName || user.email!.split("@")[0], 
+    createdAt: serverTimestamp()
+  });
+};
+
+// Fetches Global Chat, sorted by date (Ascending), limit last 50
+export const listenGlobalMessages = (callback: (msgs: any[]) => void) => {
+  const q = query(
+    collection(db, "global_chat"),
+    orderBy("createdAt", "asc"),
+    limitToLast(50) // <--- Performance Optimization
+  );
+  
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   });
 };

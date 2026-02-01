@@ -1,9 +1,0 @@
-const Navbar = () => {
-  return (
-    <main className="h-[5vh] z-50 fixed top-0 w-screen font-inter items-center flex pl-3 pr-3 justify-between bg-amber-600">
-      <p>CollegeMedia</p>
-    </main>
-  )
-}
-
-export default Navbar

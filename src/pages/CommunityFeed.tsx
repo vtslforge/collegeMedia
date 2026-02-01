@@ -6,10 +6,12 @@ import {
   listenCommunityPosts, 
   createPost, 
   kickMember,
+  leaveCommunity,
+  deleteCommunity, // <--- IMPORT THIS
   type Community,
   type Post 
 } from "../database";
-import PostItem from "./PostItem"; // Import new component
+import PostItem from "./PostItem"; 
 
 const CommunityFeed = () => {
   const { id } = useParams();
@@ -46,22 +48,35 @@ const CommunityFeed = () => {
       authorId: currentUser.uid,
       authorName: currentUser.displayName || "User",
       communityId: id,
-      type: isEvent ? "event" : "feed", // Set Type
+      type: isEvent ? "event" : "feed", 
       text: newPostText,
       media: [],
       likes: []
     });
     setNewPostText("");
     setIsEvent(false);
-    setActiveTab(isEvent ? "events" : "feed"); // Switch to relevant tab
+    setActiveTab(isEvent ? "events" : "feed"); 
   };
 
   const handleKick = async (memberId: string) => {
     if (!id || !confirm("Are you sure you want to kick this user?")) return;
     await kickMember(id, memberId);
-    // Refresh community data to update list
     const updated = await getCommunity(id);
     if (updated) setCommunity(updated);
+  };
+
+  const handleLeave = async () => {
+    if (!id || !currentUser || !confirm("Are you sure you want to leave this community?")) return;
+    await leaveCommunity(id, currentUser.uid);
+    navigate("/home/community");
+  };
+
+  // --- NEW DELETE FUNCTION ---
+  const handleDelete = async () => {
+    if (!id || !confirm("⚠️ DANGER: Are you sure? This will delete the community forever!")) return;
+    
+    await deleteCommunity(id);
+    navigate("/home/community");
   };
 
   if (!community) return <div className="p-8">Loading...</div>;
@@ -69,7 +84,6 @@ const CommunityFeed = () => {
   const isOwner = community.ownerId === currentUser?.uid;
   const canPost = community.allowMemberPosts || isOwner;
 
-  // Filter Posts for Tabs
   const displayedPosts = activeTab === "events" 
     ? posts.filter(p => p.type === "event") 
     : posts;
@@ -80,15 +94,42 @@ const CommunityFeed = () => {
       {/* 1. HEADER */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-blue-400 to-purple-500"></div>
-        <button onClick={() => navigate("/home/community")} className="text-sm text-gray-500 hover:text-black mb-2">
-          &larr; Back
-        </button>
+        
+        {/* Top Controls */}
+        <div className="flex justify-between items-center mb-2">
+            <button onClick={() => navigate("/home/community")} className="text-sm text-gray-500 hover:text-black">
+            &larr; Back
+            </button>
+
+            <div className="flex gap-2">
+                {/* LEAVE BUTTON (For Members) */}
+                {!isOwner && (
+                    <button 
+                        onClick={handleLeave} 
+                        className="text-xs font-bold text-red-500 hover:bg-red-50 px-2 py-1 rounded border border-transparent hover:border-red-100 transition-colors"
+                    >
+                        Leave
+                    </button>
+                )}
+
+                {/* DELETE BUTTON (For Owner) */}
+                {isOwner && (
+                    <button 
+                        onClick={handleDelete} 
+                        className="text-xs font-bold text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded transition-colors shadow-sm"
+                    >
+                        Delete Community
+                    </button>
+                )}
+            </div>
+        </div>
+
         <div className="flex justify-between items-start">
             <div>
                 <h1 className="text-3xl font-bold text-gray-900">{community.name}</h1>
                 <p className="text-gray-600 mt-1">{community.description}</p>
             </div>
-            {isOwner && <span className="bg-black text-white text-xs px-2 py-1 rounded">Admin View</span>}
+            {isOwner && <span className="bg-black text-white text-xs px-2 py-1 rounded h-fit">Admin View</span>}
         </div>
       </div>
 
@@ -116,7 +157,7 @@ const CommunityFeed = () => {
 
       {/* 3. CONTENT AREA */}
       
-      {/* --- CREATE POST (Visible on Feed & Events) --- */}
+      {/* --- CREATE POST --- */}
       {activeTab !== 'members' && canPost && (
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
           <textarea
@@ -164,7 +205,7 @@ const CommunityFeed = () => {
           </div>
       )}
 
-      {/* --- MEMBERS LIST (Moderation) --- */}
+      {/* --- MEMBERS LIST --- */}
       {activeTab === 'members' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {community.members.map((memberId) => (
