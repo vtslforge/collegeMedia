@@ -1,11 +1,11 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Login from "./pages/Login";
-import Layout from "./pages/Layout";
-import Feed from "./pages/Feed";
-import Content from "./pages/Content";
-import Profile from "./pages/Profile";
-import Community from "./pages/Community";
-import CommunityFeed from "./pages/CommunityFeed"; // Import the new page
+import Login from "./Components/Login";
+import Layout from "./Components/Layout";
+import Feed from "./Components/Feed";
+import Content from "./Components/Content";
+import Profile from "./Components/Profile";
+import Community from "./Components/Community";
+import CommunityFeed from "./Components/CommunityFeed"; // Import the new page
 
 function App() {
   const router = createBrowserRouter([

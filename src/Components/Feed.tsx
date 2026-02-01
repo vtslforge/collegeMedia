@@ -4,9 +4,13 @@ import type { Post } from "../database";
 import { listenFeed, toggleLike } from "../database";
 import { auth } from "../firebase";
 
+// Force ID to be required for the frontend
 type FeedPost = Post & { id: string; createdAt: any; authorName?: string };
 
 const timeAgo = (timestamp: any) => {
+  // Safety check: timestamp might be null briefly after creation
+  if (!timestamp || typeof timestamp.toMillis !== "function") return "just now";
+
   const seconds = Math.floor((Date.now() - timestamp.toMillis()) / 1000);
 
   if (seconds < 60) return "just now";
@@ -20,18 +24,23 @@ const Feed = () => {
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
 
   useEffect(() => {
-    const unsub = listenFeed(setPosts);
+    // FIX: We manually handle the data callback to cast types correctly
+    const unsub = listenFeed((data) => {
+      // We cast 'data' because we know listenFeed attaches IDs
+      setPosts(data as FeedPost[]);
+    });
     return () => unsub();
   }, []);
 
   return (
     <>
       <div className="bg-amber-100 h-auto ml-15 md:ml-40 mt-[5vh] p-4 flex flex-col gap-4">
-        {posts.length === 0 && <p>No posts yet</p>}
+        {posts.length === 0 && <p className="text-gray-600">No posts yet</p>}
 
         {posts.map((post) => {
           const userId = auth.currentUser?.uid || "";
-          const liked = post.likes.includes(userId);
+          const likes = post.likes || []; // Safety check
+          const liked = likes.includes(userId);
 
           return (
             <div
@@ -75,11 +84,11 @@ const Feed = () => {
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <button
                   onClick={() => toggleLike(post.id, userId, liked)}
-                  className="cursor-pointer text-lg"
+                  className="cursor-pointer text-lg transition-transform active:scale-125"
                 >
                   {liked ? "❤️" : "🤍"}
                 </button>
-                <span>{post.likes.length} likes</span>
+                <span>{likes.length} likes</span>
               </div>
             </div>
           );
@@ -88,8 +97,8 @@ const Feed = () => {
 
       {/* Modal */}
       {activePost && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white max-w-lg w-full p-4 rounded shadow flex flex-col gap-3">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white max-w-lg w-full p-4 rounded shadow flex flex-col gap-3 max-h-[90vh] overflow-y-auto">
 
             <div className="flex justify-between items-center">
               <p className="font-bold">
@@ -97,7 +106,7 @@ const Feed = () => {
               </p>
               <button
                 onClick={() => setActivePost(null)}
-                className="text-xl"
+                className="text-xl px-2 hover:bg-gray-100 rounded"
               >
                 ✕
               </button>

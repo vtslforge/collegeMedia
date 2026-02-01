@@ -3,45 +3,57 @@ import { useState, useEffect } from "react";
 import { auth } from "../firebase";
 import { toggleLike, addComment, listenComments } from "../database";
 
+// Define a simpler type for props to avoid strict TS issues here
+// (We handle the safety checks inside the component)
 const PostItem = ({ post }: { post: any }) => {
   const currentUser = auth.currentUser;
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
-  
-  const isLiked = post.likes.includes(currentUser?.uid);
+
+  // Safety check: Ensure likes is always an array
+  const likes = post.likes || [];
+  const isLiked = currentUser && likes.includes(currentUser.uid);
 
   // Load comments only when the user expands the section
   useEffect(() => {
-    if (showComments) {
+    if (showComments && post.id) {
       const unsubscribe = listenComments(post.id, setComments);
       return () => unsubscribe();
     }
   }, [showComments, post.id]);
 
   const handleLike = async () => {
-    if (!currentUser || !post.id) return; // Add check for post.id
-    await toggleLike(post.id, currentUser.uid, isLiked);
+    if (!currentUser || !post.id) return;
+    await toggleLike(post.id, currentUser.uid, !!isLiked);
   };
 
   const handleSendComment = async () => {
-    if (!commentText.trim() || !currentUser) return;
+    if (!commentText.trim() || !currentUser || !post.id) return;
     await addComment(post.id, commentText, currentUser);
     setCommentText("");
   };
+
+  // Safe Author Name handling
+  const authorName = post.authorName || "Anonymous";
+  const avatarLetter = authorName.charAt(0).toUpperCase();
 
   return (
     <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-4">
       {/* Post Header */}
       <div className="flex justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
-            {post.authorName[0]}
+          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-700">
+            {/* FIX: Safe access to first letter */}
+            {avatarLetter}
           </div>
           <div>
-            <span className="font-bold text-gray-900 block leading-none">{post.authorName}</span>
+            <span className="font-bold text-gray-900 block leading-none">
+              {authorName}
+            </span>
             <span className="text-xs text-gray-400">
                {post.type === 'event' && <span className="text-orange-600 font-bold mr-2">📅 EVENT</span>}
+               {/* FIX: Safe date check */}
                {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleDateString() : 'Just now'}
             </span>
           </div>
@@ -49,15 +61,15 @@ const PostItem = ({ post }: { post: any }) => {
       </div>
 
       {/* Post Content */}
-      <p className="text-gray-800 mb-4">{post.text}</p>
+      <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.text}</p>
 
       {/* Actions Bar */}
       <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
         <button 
           onClick={handleLike}
-          className={`flex items-center gap-1 text-sm font-medium ${isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+          className={`flex items-center gap-1 text-sm font-medium transition-colors ${isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
         >
-          {isLiked ? '❤️' : '🤍'} {post.likes.length} Likes
+          {isLiked ? '❤️' : '🤍'} {likes.length} Likes
         </button>
         
         <button 

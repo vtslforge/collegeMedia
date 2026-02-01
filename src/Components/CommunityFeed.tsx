@@ -9,7 +9,7 @@ import {
   type Community,
   type Post 
 } from "../database";
-import PostItem from "../pages/PostItem"; // Import new component
+import PostItem from "./PostItem"; // Import new component
 
 const CommunityFeed = () => {
   const { id } = useParams();
