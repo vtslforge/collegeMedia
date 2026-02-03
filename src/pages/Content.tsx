@@ -11,8 +11,13 @@ const Content: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePost = async () => {
-    if (!auth.currentUser) { alert("You must be logged in"); return; }
-    if (!text.trim() && !file) { return; }
+    if (!auth.currentUser) {
+      alert("You must be logged in");
+      return;
+    }
+    if (!text.trim() && !file) {
+      return;
+    }
 
     setLoading(true);
     try {
@@ -43,78 +48,56 @@ const Content: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto py-4 px-2">
-      <div className="bg-[#2b2d31] rounded-xl border border-[#1e1f22] shadow-2xl overflow-hidden">
-        
+    <div className="w-full max-w-2xl mx-auto h-[94vh] flex flex-col justify-center space-y-15 font-inter py-4 px-1">
+      <div className=" text-center overflow-hidden tracking-wide text-4xl font-extrabold text-black/40">
+        <p>Bringing our campus closer together The digital heart of our student community</p>
+      </div>
+
+      <div className="rounded-xl overflow-hidden bg-foregroundBg">
         {/* Input Section */}
         <div className="p-4 flex gap-4">
-          {/* User Avatar */}
-          <div className="w-10 h-10 rounded-full bg-amber-600 flex-shrink-0 flex items-center justify-center font-bold text-white ring-2 ring-[#1e1f22]">
-            {auth.currentUser?.email?.[0].toUpperCase()}
-          </div>
-
           <div className="flex-1 flex flex-col gap-3">
-            <textarea 
-              value={text} 
-              onChange={(e) => setText(e.target.value)} 
-              placeholder="What's happening on campus?" 
-              className="w-full bg-transparent text-[#dbdee1] text-base placeholder-[#949ba4] outline-none resize-none pt-2 min-h-[80px]"
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="What's happening on campus?"
+              className="w-full bg-transparent text-text_black text-base placeholder-[#949ba4] outline-none resize-none pt-2 min-h-20"
             />
 
             {/* Image Preview Window */}
             {file && (
-              <div className="relative rounded-lg overflow-hidden border border-[#1e1f22] bg-[#1e1f22] animate-in zoom-in-95 duration-200">
-                <button 
-                  onClick={() => setFile(null)}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-red-500 text-white rounded-full transition-all z-10"
-                >
+              <div className="relative rounded-lg overflow-hidden border bg-[#1e1f22] animate-in zoom-in-95 duration-200">
+                <button onClick={() => setFile(null)} className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-red-500 text-white rounded-full transition-all z-10">
                   <X size={14} />
                 </button>
-                <img 
-                  src={URL.createObjectURL(file)} 
-                  alt="Upload preview" 
-                  className="w-full max-h-[350px] object-cover" 
-                />
+                <img src={URL.createObjectURL(file)} alt="Upload preview" className="w-full max-h-87.5 object-cover" />
               </div>
             )}
           </div>
         </div>
 
         {/* Action Toolbar */}
-        <div className="px-4 py-3 bg-[#232428] border-t border-[#1e1f22] flex items-center justify-between">
+        <div className="px-4 py-3 bg-cardsBg flex items-center justify-between">
           <div className="flex items-center">
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              accept="image/*" 
-              onChange={(e) => setFile(e.target.files?.[0] || null)} 
-              className="hidden" 
-            />
-            
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-1.5 text-[#b5bac1] hover:text-white hover:bg-[#35373c] rounded-md transition-all text-sm font-medium"
-            >
-              <ImageIcon size={18} className="text-amber-500" />
-              <span>Image</span>
+            <input type="file" ref={fileInputRef} accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} className="hidden" />
+
+            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 hover:text-white cursor-pointer rounded-md transition-all text-sm font-medium">
+              <ImageIcon size={20} className="text-white" />
             </button>
           </div>
 
-          <button 
-            onClick={handlePost} 
-            disabled={loading || (!text.trim() && !file)} 
+          <button
+            onClick={handlePost}
+            disabled={loading || (!text.trim() && !file)}
             className={`
               flex items-center gap-2 px-5 py-2 rounded-md font-bold text-sm transition-all
-              ${loading || (!text.trim() && !file)
-                ? "bg-[#4e5058] text-[#80848e] cursor-not-allowed opacity-50"
-                : "bg-amber-600 hover:bg-amber-500 text-white active:scale-95 shadow-lg shadow-amber-900/10"}
-            `}
-          >
-            {loading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Send size={16} />
-            )}
+              ${
+                loading || (!text.trim() && !file)
+                  ? "bg-[#4e5058] text-[#80848e] cursor-not-allowed opacity-50"
+                  : "hover:bg-white text-white hover:text-black cursor-pointer active:scale-95 shadow-lg shadow-amber-900/10"
+              }
+            `}>
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             {loading ? "Posting..." : "Post"}
           </button>
         </div>
