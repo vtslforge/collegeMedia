@@ -25,7 +25,8 @@ export type Post = {
   authorId: string;
   authorName: string;
   communityId: string | null;
-  type: "feed" | "news" | "event";
+  // Added "job" and "experience" to types
+  type: "feed" | "news" | "event" | "job" | "experience"; 
   text: string;
   media: { url: string; type: string }[];
   likes: string[];
@@ -34,6 +35,14 @@ export type Post = {
 // 2. CREATE POST
 export const createPost = async (data: Post) => {
   return await addDoc(collection(db, "posts"), {
+    ...data,
+    createdAt: serverTimestamp()
+  });
+};
+
+// 3.0 CREATE CAREER OPPORTUNITY (For the Job Board)
+export const addCareerOpportunity = async (data: Omit<CareerOpportunity, "id" | "createdAt">) => {
+  return await addDoc(collection(db, "career_opportunities"), {
     ...data,
     createdAt: serverTimestamp()
   });
@@ -228,5 +237,92 @@ export const listenGlobalMessages = (callback: (msgs: any[]) => void) => {
   
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+};
+
+
+export type CareerOpportunity = {
+  id?: string;
+  companyName: string;
+  role: string;
+  type: "Full-time" | "Internship" | "Contract";
+  ctc: string; 
+  location: string;
+  deadline: any;
+  criteria: string; 
+  applyLink: string;
+  createdAt: any;
+  status: "Hiring" | "Expired" | "Result Out";
+};
+
+export type InterviewExperience = {
+  id?: string;
+  companyName: string;
+  authorName: string;
+  authorId: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  content: string; 
+  rounds: string[]; 
+  createdAt: any;
+};
+
+// --- CAREER SERVICES (REFINED) ---
+
+// A. Fetch Jobs with Optional Filtering
+export const listenCareerOpportunities = (
+  callback: (jobs: CareerOpportunity[]) => void,
+  filterType?: string // Optional: filter by "Internship" etc.
+) => {
+  let q = query(
+    collection(db, "career_opportunities"),
+    orderBy("createdAt", "desc"),
+    limit(20)
+  );
+
+  if (filterType) {
+    q = query(q, where("type", "==", filterType));
+  }
+
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map(d => ({ 
+      id: d.id, 
+      ...d.data(),
+      status: d.data().status || "Hiring" // Fallback status
+    } as CareerOpportunity)));
+  });
+};
+
+// B. Post a New Interview Experience
+export const addInterviewExperience = async (data: Omit<InterviewExperience, "id" | "createdAt">) => {
+  return await addDoc(collection(db, "interview_experiences"), {
+    ...data,
+    createdAt: serverTimestamp()
+  });
+};
+
+// C. Fetch Interview Experiences
+export const listenInterviewExperiences = (callback: (logs: InterviewExperience[]) => void) => {
+  const q = query(
+    collection(db, "interview_experiences"),
+    orderBy("createdAt", "desc")
+  );
+
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() } as InterviewExperience)));
+  });
+};
+
+// Example: Adding a Job to both the Job Board AND the General Feed
+export const addJobOpportunity = async (jobData: any) => {
+  // 1. Save to dedicated Jobs collection
+  const jobRef = await addDoc(collection(db, "jobs"), jobData);
+
+  // 2. Save a "Shadow Post" to the main Feed collection
+  await addDoc(collection(db, "posts"), {
+    text: `🚀 NEW HIRING: ${jobData.role} at ${jobData.companyName}. Package: ${jobData.ctc}. Check the Career Hub for details!`,
+    authorName: jobData.authorName,
+    type: "job", // This triggers the blue badge in your PostItem
+    createdAt: serverTimestamp(),
+    relatedId: jobRef.id // Link back to the original job if needed
   });
 };

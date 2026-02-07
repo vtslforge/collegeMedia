@@ -7,6 +7,7 @@ import Profile from "./pages/Profile";
 import Community from "./pages/Community";
 import CommunityFeed from "./pages/CommunityFeed"; 
 import Chat from "./pages/Chat";
+import Career from "./pages/Career";
 
 function App() {
   const router = createBrowserRouter([
@@ -41,6 +42,10 @@ function App() {
         {
           path: "chat",
           element: <Chat />
+        },
+                {
+          path: "career",
+          element: <Career/>
         }
       ]
     }

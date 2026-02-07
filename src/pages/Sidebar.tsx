@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Rss, User, Users, MessageSquare, ChevronLeft, ChevronRight} from "lucide-react";
+import { Home, Rss, User, Users, MessageSquare, ChevronLeft, ChevronRight,Briefcase} from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, isCollapsed, setIs
       {/* Mobile Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-[45] md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/60 z-45 md:hidden backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -42,13 +42,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen, isCollapsed, setIs
             { label: "Profile", path: "/home/profile", icon: <User size={22} /> },
             { label: "Community", path: "/home/community", icon: <Users size={22} /> },
             { label: "Chat", path: "/home/chat", icon: <MessageSquare size={22} /> },
+            { label: "Career", path: "/home/career", icon: <Briefcase size={22} /> },
           ].map((item) => (
             <button
               key={item.path}
               onClick={() => { navigate(item.path); setIsOpen(false); }}
               className="group relative flex items-center w-full p-3 rounded-xl hover:bg-[#35373c] text-[#949ba4] hover:text-white transition-all"
             >
-              <div className="flex items-center justify-center min-w-[40px]">{item.icon}</div>
+              <div className="flex items-center justify-center min-w-10">{item.icon}</div>
               <span className={`ml-3 font-semibold text-sm whitespace-nowrap transition-opacity duration-200 
                 ${isCollapsed ? "md:opacity-0" : "opacity-100"}`}>
                 {item.label}
