@@ -74,7 +74,7 @@ const Feed = () => {
 
   return (
 
-    <div className="w-full max-w-2xl mx-auto px-4 pt-8 pb-24">
+    <div className="w-full max-w-2xl mx-auto px-4 pt-8 pb-24 font-poppins ">
 
       {/* Header Section */}
 
@@ -82,19 +82,7 @@ const Feed = () => {
 
         <div>
 
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2">
-
-            Campus <span className="text-amber-500">Feed</span>
-
-          </h1>
-
-          <p className="text-[#949ba4] text-sm mt-1">Real-time updates from across campus</p>
-
-        </div>
-
-        <div className="bg-[#2b2d31] p-2 rounded-lg border border-[#1e1f22]">
-
-          <Sparkles size={20} className="text-amber-500" />
+          <p className="text-black/40 text-sm mt-1">Real-time updates from across campus</p>
 
         </div>
 
@@ -126,7 +114,7 @@ const Feed = () => {
 
             {[1, 2].map((i) => (
 
-              <div key={i} className="bg-[#2b2d31] p-5 rounded-xl border border-[#1e1f22] animate-pulse">
+              <div key={i} className="bg-black/40 p-5 rounded-xl animate-pulse">
 
                 <div className="flex gap-3 mb-4">
 
@@ -176,7 +164,7 @@ const Feed = () => {
 
             <h3 className="text-[#f2f3f5] font-bold text-lg">Silence in the halls</h3>
 
-            <p className="text-[#949ba4] max-w-[250px] mt-2">No one has posted yet. Be the first to share something!</p>
+            <p className="text-[#949ba4] max-w-62.5 mt-2">No one has posted yet. Be the first to share something!</p>
 
           </div>
 

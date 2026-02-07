@@ -5,7 +5,7 @@ import Feed from "./pages/Feed";
 import Content from "./pages/Content";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
-import CommunityFeed from "./pages/CommunityFeed"; // Import the new page
+import CommunityFeed from "./pages/CommunityFeed"; 
 import Chat from "./pages/Chat";
 
 function App() {
