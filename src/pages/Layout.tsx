@@ -20,7 +20,7 @@ const Layout: React.FC = () => {
             ${isCollapsed ? "md:pl-20" : "md:pl-64"} 
             pl-0
           `}>
-          <div className="relative z-10 max-w-170 mx-auto">
+          <div className="relative z-10 w-full">
             <Outlet />
           </div>
         </main>
@@ -30,3 +30,4 @@ const Layout: React.FC = () => {
 };
 
 export default Layout;
+
