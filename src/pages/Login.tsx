@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "fire
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase";
+import puLogo from "../assets/pu.png";
 
 type AuthFormInputs = {
   user: string;
@@ -62,6 +63,7 @@ const Login = () => {
         }}>
         <header className="flex h-full flex-col gap-3 justify-between items-start md:p-15">
           <h1 className="text-4xl md:text-5xl font-bold tracking-widest text-wrap">Presidency University</h1>
+          <img src={puLogo} alt="Presidency University logo" className="w-[80%]  h-auto object-contain" />
           <div className="flex flex-col gap-3">
             <h4 className="text-sm md:text-xl">Your digital campus space</h4>
             <h3 className="text-lg md:text-3xl">Empowering students to connect, communicate, and build their campus community</h3>
